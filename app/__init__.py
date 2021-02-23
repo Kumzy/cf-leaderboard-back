@@ -46,10 +46,7 @@ migrate = Migrate(app, db)
 #Routes import
 from app.routes import competitor
 
-
-
 #Models import
-
 from app.models.competitor import Competitor
 from app.models.competition import Competition
 
