@@ -10,6 +10,7 @@ class Competitor(db.Model):
     lastname = db.Column(db.Text, nullable=False)
     email = db.Column(db.Text, unique=True)
     active = db.Column(db.Boolean)
+    created_on = db.Column(db.DateTime(timezone=True),server_default=db.text('now()'))
 
 class CompetitorSchema(ma.SQLAlchemySchema):
     class Meta:
@@ -20,3 +21,4 @@ class CompetitorSchema(ma.SQLAlchemySchema):
     lastname = ma.auto_field()
     email = ma.auto_field()
     active = ma.auto_field()
+    created_on = ma.auto_field()

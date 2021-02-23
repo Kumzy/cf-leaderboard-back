@@ -10,6 +10,7 @@ class User(db.Model):
     lastname = db.Column(db.Text, nullable=False)
     email = db.Column(db.Text, unique=True)
     active = db.Column(db.Boolean)
+    password_hash = db.Column(db.Text, nullable=False)
 
 class UserSchema(ma.SQLAlchemySchema):
     class Meta:
