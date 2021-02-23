@@ -45,16 +45,12 @@ migrate = Migrate(app, db)
 
 #Routes import
 from app.routes import competitor
-# from app.routes import history
-# from app.routes import currency
 
 
 
 #Models import
 
 from app.models.competitor import Competitor
-# from app.models.currency_pair import CurrencyPair
-# from app.models.account import Account
-# from app.models.history import History
+from app.models.competition import Competition
 
 
