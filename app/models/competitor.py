@@ -1,6 +1,7 @@
 from sqlalchemy.dialects.postgresql import UUID
 from app import db, ma
 from app.models.gender import GenderSchema
+from app.models.country import CountrySchema
 
 class Competitor(db.Model):
     __tablename__ = 'competitor'
@@ -15,6 +16,9 @@ class Competitor(db.Model):
     gender_id = db.Column(UUID(as_uuid=True), db.ForeignKey('gender.id'))
     gender = db.relationship("Gender", primaryjoin="Gender.id==Competitor.gender_id",
                                      remote_side="Gender.id")
+    nationality_id = db.Column(UUID(as_uuid=True), db.ForeignKey('country.id'))
+    nationality = db.relationship("Country", primaryjoin="Country.id==Competitor.nationality_id",
+                             remote_side="Country.id")
 
 class CompetitorSchema(ma.SQLAlchemySchema):
     class Meta:
@@ -29,3 +33,4 @@ class CompetitorSchema(ma.SQLAlchemySchema):
     active = ma.auto_field()
     created_on = ma.auto_field()
     gender = ma.Nested(GenderSchema)
+    nationality = ma.Nested(CountrySchema)
