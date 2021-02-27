@@ -12,3 +12,13 @@ def competitors():
     result = competitor_schema.dump(competitors)
     resp_object = {'code': 20000, 'data': {'items': result}}
     return jsonify(resp_object), 200
+
+@app.route('/api/competitor/<id>', methods=['GET','POST','PUT'])
+@cross_origin()
+def competitor(id):
+    competitor = Competitor.query.get_or_404(id)
+    competitor_schema = CompetitorSchema(many=False)
+    # Serialize the queryset
+    result = competitor_schema.dump(competitor)
+    resp_object = {'code': 20000, 'data': {'item': result}}
+    return jsonify(resp_object), 200
