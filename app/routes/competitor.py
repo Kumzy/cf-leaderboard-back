@@ -13,7 +13,7 @@ def competitors():
     resp_object = {'code': 20000, 'data': {'items': result}}
     return jsonify(resp_object), 200
 
-@app.route('/api/competitor/<id>', methods=['GET','POST','PUT'])
+@app.route('/api/competitor/<id>', methods=['GET','PUT'])
 @cross_origin()
 def competitor(id):
     competitor = Competitor.query.get_or_404(id)

@@ -7,6 +7,8 @@ class Country(db.Model):
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, server_default=db.text('gen_random_uuid()'))
     name = db.Column(db.Text, nullable=False)
+    iso2 = db.Column(db.Text, nullable=False)
+    iso3 = db.Column(db.Text, nullable=False)
 
 class CountrySchema(ma.SQLAlchemySchema):
     class Meta:
@@ -14,3 +16,5 @@ class CountrySchema(ma.SQLAlchemySchema):
 
     id = ma.auto_field()
     name = ma.auto_field()
+    iso2 = ma.auto_field()
+    iso3 = ma.auto_field()

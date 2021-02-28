@@ -45,8 +45,12 @@ migrate = Migrate(app, db)
 
 #Routes import
 from app.routes import competitor
+from app.routes import country
+from app.routes import gender
 
 #Models import
+from app.models.country import Country
+from app.models.gender import Gender
 from app.models.competitor import Competitor
 from app.models.competition import Competition
 
