@@ -33,8 +33,8 @@ app.config['JWT_SECRET_KEY'] = 'ksIm5iZiI6MTU4ODYwODAwOSwianRpIjoiOWE'
 # jwt = JWTManager(app)
 
 # enable CORS
-#cors = CORS()
-#CORS(app, origins='http://localhost:9527', resources={r'/*': {'origins': '*'}}, supports_credentials=True)
+cors = CORS()
+CORS(app, origins='http://localhost:8080', resources={r'/*': {'origins': '*'}}, supports_credentials=True)
 
 #login = LoginManager(app)
 #login.login_view = 'login'
@@ -51,7 +51,9 @@ from app.routes import gender
 #Models import
 from app.models.country import Country
 from app.models.gender import Gender
+from app.models.category import Category
 from app.models.competitor import Competitor
 from app.models.competition import Competition
+from app.models.event import Event
 
 
