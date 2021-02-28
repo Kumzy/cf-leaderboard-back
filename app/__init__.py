@@ -47,6 +47,7 @@ migrate = Migrate(app, db)
 from app.routes import competitor
 from app.routes import country
 from app.routes import gender
+from app.routes import competition
 
 #Models import
 from app.models.country import Country
