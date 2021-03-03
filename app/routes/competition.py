@@ -20,7 +20,7 @@ def competition(id):
     competition_schema = CompetitionSchema()
     # Serialize the queryset
     result = competition_schema.dump(competition)
-    resp_object = {'code': 20000, 'data': {'competition': result}}
+    resp_object = {'code': 20000, 'data': {'item': result}}
     return jsonify(resp_object), 200
 
 @app.route('/api/competition', methods=['POST'])
@@ -29,10 +29,14 @@ def post_competition():
     if not request.is_json:
         return jsonify({"message": "Missing JSON in request"}), 400
     name = request.json.get('name', None)
+    date_start = request.json.get('date_start', None)
     if not name:
         return jsonify({"message": "Missing name parameter"}), 400
+    if not date_start:
+        return jsonify({"message": "Missing date_start parameter"}), 400
     competition = Competition()
     competition.name = name
+    competition.date_start = date_start
     try:
         db.session.add(competition)
         db.session.flush()

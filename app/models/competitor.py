@@ -1,4 +1,4 @@
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, JSONB
 from app import db, ma
 from app.models.gender import GenderSchema
 from app.models.country import CountrySchema
@@ -12,6 +12,7 @@ class Competitor(db.Model):
     lastname = db.Column(db.Text, nullable=False)
     email = db.Column(db.Text, unique=True)
     active = db.Column(db.Boolean)
+    avatar = db.Column(JSONB)
     height = db.Column(db.Integer)
     birthday_date = db.Column(db.Date)
     weight = db.Column(db.Integer)

@@ -56,5 +56,12 @@ from app.models.category import Category
 from app.models.competitor import Competitor
 from app.models.competition import Competition
 from app.models.event import Event
+from app.models.score import Score
 
+from sqlalchemy.orm import mapper
+Competition.events = db.relationship('Event', backref='competition', uselist=True, lazy='dynamic')
+# mapper(Competition, properties={
+#     "events":db.relationship(lambda: Event,
+#                         order_by=lambda: Event.id)
+# })
 
