@@ -1,5 +1,6 @@
 from sqlalchemy.dialects.postgresql import UUID
 from app import db, ma
+from app.models.event import Event
 
 class Competition(db.Model):
     __tablename__ = 'competition'
@@ -9,7 +10,8 @@ class Competition(db.Model):
     name = db.Column(db.Text, unique=True)
     date_start = db.Column(db.Date)
     created_on = db.Column(db.DateTime(timezone=True),server_default=db.text('now()'))
-    #events = db.relationship('Event', backref='competition', uselist=True)
+    events = db.relationship(Event, primaryjoin='Event.competition_id==Competition.id',
+                               uselist=True, viewonly=True, lazy='dynamic')
 
 
 class CompetitionSchema(ma.SQLAlchemySchema):
