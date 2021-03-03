@@ -43,12 +43,6 @@ ma = Marshmallow(app)
 #cors.init_app(app, resources={r"*": {"origins": "*"}})
 migrate = Migrate(app, db)
 
-#Routes import
-from app.routes import competitor
-from app.routes import country
-from app.routes import gender
-from app.routes import competition
-
 #Models import
 from app.models.country import Country
 from app.models.gender import Gender
@@ -57,3 +51,11 @@ from app.models.competitor import Competitor
 from app.models.competition import Competition
 from app.models.event import Event
 from app.models.score import Score
+from app.models.link_competition_category import LinkCompetitionCategory
+
+#Routes import
+from app.routes import competitor
+from app.routes import country
+from app.routes import gender
+from app.routes import competition
+

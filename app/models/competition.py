@@ -1,6 +1,8 @@
 from sqlalchemy.dialects.postgresql import UUID
 from app import db, ma
 from app.models.event import Event
+from app.models.category import Category
+from app.models.link_competition_category import LinkCompetitionCategory
 
 class Competition(db.Model):
     __tablename__ = 'competition'
@@ -12,6 +14,7 @@ class Competition(db.Model):
     created_on = db.Column(db.DateTime(timezone=True),server_default=db.text('now()'))
     events = db.relationship(Event, primaryjoin='Event.competition_id==Competition.id',
                                uselist=True, viewonly=True, lazy='dynamic')
+    categories = db.relationship(Category, secondary='link_competition_category', uselist=True, viewonly=True)
 
 
 class CompetitionSchema(ma.SQLAlchemySchema):
@@ -25,3 +28,4 @@ class CompetitionSchema(ma.SQLAlchemySchema):
     date_start = ma.auto_field()
     created_on = ma.auto_field()
     events = ma.Nested('EventSchema',many=True)
+    categories = ma.Nested('CategorySchema', many=True)

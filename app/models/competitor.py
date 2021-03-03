@@ -2,6 +2,7 @@ from sqlalchemy.dialects.postgresql import UUID, JSONB
 from app import db, ma
 from app.models.gender import GenderSchema
 from app.models.country import CountrySchema
+from sqlalchemy.ext.hybrid import hybrid_property
 
 class Competitor(db.Model):
     __tablename__ = 'competitor'
@@ -24,6 +25,11 @@ class Competitor(db.Model):
     nationality = db.relationship("Country", primaryjoin="Country.id==Competitor.nationality_id",
                              remote_side="Country.id")
 
+    # Retrieve the last price from the API
+    @hybrid_property
+    def longname(self):
+        return self.firstname + ' ' + self.lastname
+
 class CompetitorSchema(ma.SQLAlchemySchema):
     class Meta:
         model = Competitor
@@ -41,3 +47,4 @@ class CompetitorSchema(ma.SQLAlchemySchema):
     created_on = ma.auto_field()
     gender = ma.Nested(GenderSchema)
     nationality = ma.Nested(CountrySchema)
+    longname = ma.String()
