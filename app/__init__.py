@@ -52,6 +52,7 @@ from app.models.competition import Competition
 from app.models.event import Event
 from app.models.score import Score
 from app.models.link_competition_category import LinkCompetitionCategory
+from app.models.link_competition_competitor import LinkCompetitionCompetitor
 
 #Routes import
 from app.routes import competitor

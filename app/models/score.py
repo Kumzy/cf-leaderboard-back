@@ -5,6 +5,10 @@ class Score(db.Model):
     __tablename__ = 'score'
     __name_list__ = f'{__tablename__}s'
 
+    __table_args__ = (
+        db.UniqueConstraint('competitor_id', 'event_id'),
+    )
+
     id = db.Column(UUID(as_uuid=True), primary_key=True, server_default=db.text('gen_random_uuid()'))
     score = db.Column(db.Integer)
     created_on = db.Column(db.DateTime(timezone=True),server_default=db.text('now()'))
@@ -17,6 +21,7 @@ class Score(db.Model):
     competitor_id = db.Column(UUID(as_uuid=True), db.ForeignKey('competitor.id'))
     competitor = db.relationship("Competitor", primaryjoin="Competitor.id==Score.competitor_id",
                             remote_side="Competitor.id")
+
 
 class ScoreSchema(ma.SQLAlchemySchema):
     class Meta:
