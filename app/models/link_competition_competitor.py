@@ -9,8 +9,6 @@ class LinkCompetitionCompetitor(db.Model):
     competitor_id = db.Column(UUID(as_uuid=True), db.ForeignKey('competitor.id'))
     competition_id = db.Column(UUID(as_uuid=True), db.ForeignKey('competition.id'))
 
-
-
 class LinkCompetitionCompetitorSchema(ma.SQLAlchemySchema):
     class Meta:
         model = LinkCompetitionCompetitor

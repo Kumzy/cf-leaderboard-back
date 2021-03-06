@@ -7,7 +7,7 @@ from app.models.link_competition_competitor import LinkCompetitionCompetitor
 @app.route('/api/competitors', methods=['GET'])
 @cross_origin()
 def competitors():
-    exclude_competitors_in_competition_id = request.headers.get('exclude_competitors_in_competition_id')
+    exclude_competitors_in_competition_id = request.args.get('exclude_competitors_in_competition_id')
     if exclude_competitors_in_competition_id is not None:
         # Means we want only competitors that are not in the competition
         subquery = db.session.query(Competitor.id) \

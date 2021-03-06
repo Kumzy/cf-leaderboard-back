@@ -2,6 +2,16 @@ from app import app, db
 from flask import jsonify, request
 from flask_cors import cross_origin
 from app.models.competition import Competition, CompetitionSchema
+import json
+
+import decimal, datetime
+
+def alchemyencoder(obj):
+    """JSON encoder function for SQLAlchemy special classes."""
+    if isinstance(obj, datetime.date):
+        return obj.isoformat()
+    elif isinstance(obj, decimal.Decimal):
+        return float(obj)
 
 @app.route('/api/competitions', methods=['GET'])
 @cross_origin()
@@ -21,6 +31,53 @@ def competition(id):
     # Serialize the queryset
     result = competition_schema.dump(competition)
     resp_object = {'code': 20000, 'data': {'item': result}}
+    return jsonify(resp_object), 200
+
+@app.route('/api/competition/<id>/leaderboard', methods=['GET'])
+@cross_origin()
+def competition_leaderboard(id):
+    # Retrieve gender first
+    gender_id = request.args.get('gender_id')
+    if gender_id is None:
+        return jsonify({"message": "Missing gender_id parameter"}), 400
+    sql_request = "with scores as ( " \
+        "select competitor.id as competitor_id, " \
+	    "to_jsonb(competitor.*) as competitor, " \
+        "score.result, "\
+        "to_jsonb(category.*) as category, "\
+        "to_jsonb(event.*) as event, "\
+        "event.id as event_id, "\
+        "CASE WHEN event.max_score_best THEN ROW_NUMBER () OVER (PARTITION BY category.id,event.id ORDER BY score desc) + (category.position * 1000) "\
+        "ELSE ROW_NUMBER () OVER (PARTITION BY category.id,event.id ORDER BY score) + (category.position * 1000) "\
+        "END as position_wod " \
+        "from score " \
+        "left join event on score.event_id = event.id " \
+        "left join category on category.id = score.category_id "\
+        "left join competition on competition.id = event.competition_id "\
+        "left join competitor on competitor.id = score.competitor_id "\
+        "left join gender on gender.id = competitor.gender_id "\
+        "where gender.id = :gender_id " \
+        "and competition.id = :competition_id " \
+        "order by event.name asc,  position asc "\
+        "),scores_points as ( "\
+        "SELECT *, "\
+        "ROW_NUMBER () OVER (PARTITION BY event_id ORDER BY position_wod) as point "\
+        "FROM scores) "\
+        "select competitor.id, competitor.firstname, competitor.lastname,  sum(scores_points.point) as points, jsonb_agg(scores_points.*) as events, "\
+        "ROW_NUMBER () OVER (order by sum(scores_points.point) asc) as rank " \
+        "from competitor " \
+        "left join scores_points on scores_points.competitor_id = competitor.id " \
+        "LEFT JOIN link_competition_competitor lcc on lcc.competitor_id = competitor.id " \
+        "left join gender on gender.id = competitor.gender_id " \
+        "where lcc.competition_id = :competition_id " \
+        "and gender.id = :gender_id " \
+        "group by competitor.id; "
+    results = db.session.execute(
+        sql_request,
+        {'gender_id': gender_id, 'competition_id': id}
+    )
+    o = json.dumps([dict(r) for r in results], default=alchemyencoder)
+    resp_object = {'code': 20000, 'data': {'items': json.loads(o)}}
     return jsonify(resp_object), 200
 
 @app.route('/api/competition', methods=['POST'])
