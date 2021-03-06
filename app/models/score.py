@@ -10,7 +10,7 @@ class Score(db.Model):
     )
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, server_default=db.text('gen_random_uuid()'))
-    score = db.Column(db.Integer)
+    result = db.Column(db.Integer)
     created_on = db.Column(db.DateTime(timezone=True),server_default=db.text('now()'))
     event_id = db.Column(UUID(as_uuid=True), db.ForeignKey('event.id'))
     event = db.relationship("Event", primaryjoin="Event.id==Score.event_id",
@@ -30,7 +30,7 @@ class ScoreSchema(ma.SQLAlchemySchema):
         load_instance = True
 
     id = ma.auto_field()
-    score = ma.auto_field()
+    result = ma.auto_field()
     created_on = ma.auto_field()
     event = ma.Nested('EventSchema')
     category = ma.Nested('CategorySchema')

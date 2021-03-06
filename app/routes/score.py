@@ -4,24 +4,34 @@ from flask_cors import cross_origin
 from app.models.score import Score, ScoreSchema
 
 @app.route('/api/score', methods=['POST'])
+# TODO: Add jwt_required for auth required to access this route
 @cross_origin()
 def post_score():
-    # if not request.is_json:
-    #     return jsonify({"message": "Missing JSON in request"}), 400
-    # name = request.json.get('name', None)
-    # date_start = request.json.get('date_start', None)
-    # if not name:
-    #     return jsonify({"message": "Missing name parameter"}), 400
-    # if not date_start:
-    #     return jsonify({"message": "Missing date_start parameter"}), 400
-    # competition = Score()
-    # competition.name = name
-    # competition.date_start = date_start
-    # try:
-    #     db.session.add(competition)
-    #     db.session.flush()
-    #     db.session.commit()
-    # except:
-    #     db.session.rollback()
-    resp_object = {'code': 20000, 'data': {'competition': None}}
+    if not request.is_json:
+        return jsonify({"message": "Missing JSON in request"}), 400
+    event = request.json.get('event', None)
+    competitor = request.json.get('competitor', None)
+    category = request.json.get('category', None)
+    result = request.json.get('result', None)
+    if not event:
+        return jsonify({"message": "Missing event parameter"}), 400
+    if not competitor:
+        return jsonify({"message": "Missing competitor parameter"}), 400
+    if not category:
+        return jsonify({"message": "Missing category parameter"}), 400
+    if not result:
+        return jsonify({"message": "Missing result parameter"}), 400
+    score = Score()
+    score.event_id = event['id']
+    score.competitor_id = competitor['id']
+    score.category_id = category['id']
+    score.result = result
+    try:
+        db.session.add(score)
+        db.session.flush()
+        db.session.commit()
+    except:
+        db.session.rollback()
+        return jsonify({"message": "Could not insert data"}), 400
+    resp_object = {'code': 20000, 'data': {'item': None}}
     return jsonify(resp_object), 200

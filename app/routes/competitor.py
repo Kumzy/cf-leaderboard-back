@@ -2,11 +2,20 @@ from app import app, db
 from flask import jsonify, request
 from flask_cors import cross_origin
 from app.models.competitor import Competitor, CompetitorSchema
+from app.models.link_competition_competitor import LinkCompetitionCompetitor
 
 @app.route('/api/competitors', methods=['GET'])
 @cross_origin()
 def competitors():
-    competitors = Competitor.query.all()
+    exclude_competitors_in_competition_id = request.headers.get('exclude_competitors_in_competition_id')
+    if exclude_competitors_in_competition_id is not None:
+        # Means we want only competitors that are not in the competition
+        subquery = db.session.query(Competitor.id) \
+                        .filter(Competitor.id == LinkCompetitionCompetitor.competitor_id) \
+                        .filter(LinkCompetitionCompetitor.competition_id == exclude_competitors_in_competition_id)
+        competitors = Competitor.query.filter(~Competitor.id.in_(subquery))
+    else:
+        competitors = Competitor.query.all()
     competitor_schema = CompetitorSchema(many=True)
     # Serialize the queryset
     result = competitor_schema.dump(competitors)

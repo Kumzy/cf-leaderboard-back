@@ -59,4 +59,5 @@ from app.routes import competitor
 from app.routes import country
 from app.routes import gender
 from app.routes import competition
+from app.routes import score
 
