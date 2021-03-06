@@ -63,7 +63,7 @@ def competition_leaderboard(id):
         "SELECT *, "\
         "ROW_NUMBER () OVER (PARTITION BY event_id ORDER BY position_wod) as point "\
         "FROM scores) "\
-        "select competitor.id, competitor.firstname, competitor.lastname,  sum(scores_points.point) as points, jsonb_agg(scores_points.*) as events, "\
+        "select competitor.id, concat(competitor.firstname, ' ', competitor.lastname) as longname,  sum(scores_points.point) as points, jsonb_agg(scores_points.*) as events, "\
         "ROW_NUMBER () OVER (order by sum(scores_points.point) asc) as rank " \
         "from competitor " \
         "left join scores_points on scores_points.competitor_id = competitor.id " \

@@ -3,8 +3,10 @@ from app import db, ma
 from app.models.event import Event
 from app.models.category import Category
 from app.models.competitor import Competitor
+from app.models.gender import Gender
 from app.models.link_competition_category import LinkCompetitionCategory
 from app.models.link_competition_competitor import LinkCompetitionCompetitor
+from app.models.link_competition_gender import LinkCompetitionGender
 
 class Competition(db.Model):
     __tablename__ = 'competition'
@@ -18,6 +20,7 @@ class Competition(db.Model):
                                uselist=True, viewonly=True, lazy='dynamic')
     categories = db.relationship(Category, secondary='link_competition_category', uselist=True, viewonly=True)
     competitors = db.relationship(Competitor, secondary='link_competition_competitor', uselist=True, viewonly=True)
+    genders = db.relationship(Gender, secondary='link_competition_gender', uselist=True, viewonly=True)
 
 class CompetitionSchema(ma.SQLAlchemySchema):
     class Meta:
@@ -32,3 +35,4 @@ class CompetitionSchema(ma.SQLAlchemySchema):
     events = ma.Nested('EventSchema',many=True)
     categories = ma.Nested('CategorySchema', many=True)
     competitors = ma.Nested('CompetitorSchema', many=True)
+    genders = ma.Nested('GenderSchema', many=True)
