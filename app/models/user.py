@@ -1,5 +1,6 @@
 from sqlalchemy.dialects.postgresql import UUID
 from app import db, ma
+from werkzeug.security import generate_password_hash, check_password_hash
 
 class User(db.Model):
     __tablename__ = 'user'
@@ -11,6 +12,15 @@ class User(db.Model):
     email = db.Column(db.Text, unique=True)
     active = db.Column(db.Boolean)
     password_hash = db.Column(db.Text, nullable=False)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+    def get_id(self):
+        return self.id
 
 class UserSchema(ma.SQLAlchemySchema):
     class Meta:

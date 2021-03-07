@@ -4,6 +4,7 @@ from config import Config
 import config
 from flask_migrate import Migrate
 from flask_marshmallow import Marshmallow
+from flask_jwt_extended import JWTManager
 
 from flask_cors import CORS
 import os
@@ -30,7 +31,7 @@ app.config['JWT_SECRET_KEY'] = 'ksIm5iZiI6MTU4ODYwODAwOSwianRpIjoiOWE'
 #app.config['JWT_SECRET_KEY'] = os.urandom(24)
 
 
-# jwt = JWTManager(app)
+jwt = JWTManager(app)
 
 # enable CORS
 cors = CORS()
@@ -54,6 +55,7 @@ from app.models.score import Score
 from app.models.link_competition_category import LinkCompetitionCategory
 from app.models.link_competition_competitor import LinkCompetitionCompetitor
 from app.models.link_competition_gender import LinkCompetitionGender
+from app.models.user import User
 
 #Routes import
 from app.routes import competitor
@@ -61,4 +63,5 @@ from app.routes import country
 from app.routes import gender
 from app.routes import competition
 from app.routes import score
+from app.routes import login
 
