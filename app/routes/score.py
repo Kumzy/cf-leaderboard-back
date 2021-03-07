@@ -2,9 +2,11 @@ from app import app, db
 from flask import jsonify, request
 from flask_cors import cross_origin
 from app.models.score import Score, ScoreSchema
+from flask_jwt_extended import jwt_required
 
 @app.route('/api/score', methods=['POST'])
 # TODO: Add jwt_required for auth required to access this route
+@jwt_required()
 @cross_origin()
 def post_score():
     if not request.is_json:
