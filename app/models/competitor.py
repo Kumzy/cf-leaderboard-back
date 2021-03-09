@@ -39,6 +39,7 @@ class CompetitorSchema(ma.SQLAlchemySchema):
     id = ma.auto_field()
     firstname = ma.auto_field()
     lastname = ma.auto_field()
+    avatar = ma.auto_field()
     email = ma.auto_field()
     active = ma.auto_field()
     height = ma.auto_field()
