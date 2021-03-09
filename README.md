@@ -20,3 +20,8 @@ flask db upgrade
 flask db migrate -m "<comment>"
 flask db upgrade
 ```
+
+## Run
+```
+uwsgi --socket 0.0.0.0:5000 --protocol=http -w cf_leaderboard:app
+```

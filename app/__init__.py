@@ -35,7 +35,8 @@ jwt = JWTManager(app)
 
 # enable CORS
 cors = CORS()
-CORS(app, origins='http://localhost:8080', resources={r'/*': {'origins': '*'}}, supports_credentials=True)
+#CORS(app, origins='http://localhost:8080', resources={r'/*': {'origins': '*'}}, supports_credentials=True)
+CORS(app, resources={r'/*': {'origins': '*'}})#, supports_credentials=True)
 
 #login = LoginManager(app)
 #login.login_view = 'login'
@@ -65,3 +66,5 @@ from app.routes import competition
 from app.routes import score
 from app.routes import login
 
+if __name__ == "__main__":
+    app.run(host='0.0.0.0')

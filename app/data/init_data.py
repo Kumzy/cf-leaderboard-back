@@ -3,31 +3,31 @@ from app import db
 
 engine = db.get_engine()  # db is the one from the question
 csv_competitors_path = 'competitors.csv'
-# csv_gender_path = 'genders.csv'
-# csv_country_path = 'countries.csv'
+csv_gender_path = 'genders.csv'
+csv_country_path = 'countries.csv'
 
-#
-# # Genders
-# # Read CSV with Pandas
-# with open(csv_gender_path, 'r', encoding='utf_8') as file:
-#     df_gender = pd.read_csv(file)
-#
-# # Insert into DB
-# df_gender.to_sql('gender',
-#           con=engine,
-#           index=False,
-#           if_exists='append')
-#
-# # Countries
-# # Read CSV with Pandas
-# with open(csv_country_path, 'r', encoding='utf_8') as file:
-#     df_country = pd.read_csv(file)
-#
-# # Insert into DB
-# df_country.to_sql('country',
-#           con=engine,
-#           index=False,
-#           if_exists='append')
+
+# Genders
+# Read CSV with Pandas
+with open(csv_gender_path, 'r', encoding='utf_8') as file:
+    df_gender = pd.read_csv(file)
+
+# Insert into DB
+df_gender.to_sql('gender',
+          con=engine,
+          index=False,
+          if_exists='append')
+
+# Countries
+# Read CSV with Pandas
+with open(csv_country_path, 'r', encoding='utf_8') as file:
+    df_country = pd.read_csv(file)
+
+# Insert into DB
+df_country.to_sql('country',
+          con=engine,
+          index=False,
+          if_exists='append')
 
 
 # Genders
