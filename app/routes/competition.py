@@ -6,7 +6,7 @@ import json
 from app.models.link_competition_competitor import LinkCompetitionCompetitor
 import decimal, datetime
 from sqlalchemy.sql.expression import and_
-
+from flask_jwt_extended import jwt_required
 def alchemyencoder(obj):
     """JSON encoder function for SQLAlchemy special classes."""
     if isinstance(obj, datetime.date):
@@ -83,6 +83,7 @@ def competition_leaderboard(id):
 
 @app.route('/api/competition', methods=['POST'])
 @cross_origin()
+@jwt_required()
 def post_competition():
     if not request.is_json:
         return jsonify({"message": "Missing JSON in request"}), 400
@@ -105,6 +106,7 @@ def post_competition():
     return jsonify(resp_object), 200
 
 @app.route('/api/competition/competitor/add', methods=['POST'])
+@jwt_required()
 @cross_origin()
 def add_competitor_to_competition():
     if not request.is_json:
@@ -128,6 +130,7 @@ def add_competitor_to_competition():
     return jsonify(resp_object), 200
 
 @app.route('/api/competition/competitor', methods=['DELETE'])
+@jwt_required()
 @cross_origin()
 def remove_competitor_from_competition():
     competitor_id = request.args.get('competitor_id')

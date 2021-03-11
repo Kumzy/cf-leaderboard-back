@@ -3,6 +3,7 @@ from flask import jsonify, request
 from flask_cors import cross_origin
 from app.models.competitor import Competitor, CompetitorSchema
 from app.models.link_competition_competitor import LinkCompetitionCompetitor
+from flask_jwt_extended import jwt_required
 
 @app.route('/api/competitors', methods=['GET'])
 @cross_origin()
@@ -34,6 +35,7 @@ def competitor(id):
 
 @app.route('/api/competitor/<id>', methods=['PUT','DELETE'])
 @cross_origin()
+@jwt_required()
 def competitor_protected(id):
     #TODO: Add protected to this route
     if request.method == 'DELETE':
@@ -81,6 +83,7 @@ def competitor_protected(id):
         return jsonify(resp_object), 200
 
 @app.route('/api/competitor', methods=['POST'])
+@jwt_required()
 @cross_origin()
 def competitor_post():
     #TODO: Add protected to this route
