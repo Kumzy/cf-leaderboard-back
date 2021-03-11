@@ -1,17 +1,13 @@
-from flask import Flask, jsonify
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
-import config
 from flask_migrate import Migrate
 from flask_marshmallow import Marshmallow
 from flask_jwt_extended import JWTManager
-
 from flask_cors import CORS
-import os
 
 app = Flask(__name__)
 app.config.from_object(Config)
-
 
 # Only allow JWT cookies to be sent over https. In production, this
 # should likely be True
@@ -27,8 +23,7 @@ app.config['JWT_HEADER_TYPE'] = 'Bearer'
 #
 # app.config['JWT_COOKIE_CSRF_PROTECT'] = False
 
-app.config['JWT_SECRET_KEY'] = 'ksIm5iZiI6MTU4ODYwODAwOSwianRpIjoiOWE'
-#app.config['JWT_SECRET_KEY'] = os.urandom(24)
+app.config['JWT_SECRET_KEY'] = Config.JWT_SECRET_KEY
 
 
 jwt = JWTManager(app)

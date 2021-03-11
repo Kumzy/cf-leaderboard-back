@@ -5,6 +5,7 @@ from app.models.competition import Competition, CompetitionSchema
 import json
 from app.models.link_competition_competitor import LinkCompetitionCompetitor
 import decimal, datetime
+from sqlalchemy.sql.expression import and_
 
 def alchemyencoder(obj):
     """JSON encoder function for SQLAlchemy special classes."""
@@ -123,5 +124,26 @@ def add_competitor_to_competition():
         db.session.commit()
     except:
         db.session.rollback()
+    resp_object = {'code': 20000, 'data': {'link_competition_competitor': None}}
+    return jsonify(resp_object), 200
+
+@app.route('/api/competition/competitor', methods=['DELETE'])
+@cross_origin()
+def remove_competitor_from_competition():
+    competitor_id = request.args.get('competitor_id')
+    competition_id = request.args.get('competition_id')
+    if not competition_id:
+        return jsonify({"message": "Missing competition_id parameter"}), 400
+    if not competitor_id:
+        return jsonify({"message": "Missing competitor_id parameter"}), 400
+
+    # linkCompetitionCompetitor = LinkCompetitionCompetitor()
+    try:
+        LinkCompetitionCompetitor.query.filter(and_(LinkCompetitionCompetitor.competitor_id == competitor_id,
+                                                      LinkCompetitionCompetitor.competition_id == competition_id)).delete()
+        db.session.commit()
+    except:
+        db.session.rollback()
+        return jsonify({"message": "Error removing the competitor"}), 400
     resp_object = {'code': 20000, 'data': {'link_competition_competitor': None}}
     return jsonify(resp_object), 200
