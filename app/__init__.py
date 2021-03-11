@@ -11,7 +11,7 @@ app.config.from_object(Config)
 
 # Only allow JWT cookies to be sent over https. In production, this
 # should likely be True
-# app.config['JWT_COOKIE_SECURE'] = False
+app.config['JWT_COOKIE_SECURE'] = True
 app.config['JWT_TOKEN_LOCATION'] = ['headers']
 
 app.config['JWT_HEADER_NAME'] = 'Authorization'

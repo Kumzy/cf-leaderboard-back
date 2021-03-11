@@ -7,6 +7,7 @@ from app.models.link_competition_competitor import LinkCompetitionCompetitor
 import decimal, datetime
 from sqlalchemy.sql.expression import and_
 from flask_jwt_extended import jwt_required
+
 def alchemyencoder(obj):
     """JSON encoder function for SQLAlchemy special classes."""
     if isinstance(obj, datetime.date):

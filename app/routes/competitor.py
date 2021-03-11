@@ -37,7 +37,6 @@ def competitor(id):
 @cross_origin()
 @jwt_required()
 def competitor_protected(id):
-    #TODO: Add protected to this route
     if request.method == 'DELETE':
         competitor = Competitor.query.get_or_404(id)
         db.session.delete(competitor)
@@ -86,7 +85,6 @@ def competitor_protected(id):
 @jwt_required()
 @cross_origin()
 def competitor_post():
-    #TODO: Add protected to this route
     if not request.is_json:
         return jsonify({"message": "Missing JSON in request"}), 400
     firstname = request.json.get('firstname', None)
