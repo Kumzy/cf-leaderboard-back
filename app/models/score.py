@@ -21,6 +21,8 @@ class Score(db.Model):
     competitor_id = db.Column(UUID(as_uuid=True), db.ForeignKey('competitor.id'))
     competitor = db.relationship("Competitor", primaryjoin="Competitor.id==Score.competitor_id",
                             remote_side="Competitor.id")
+    tiebreak = db.Column(db.Integer)
+    time = db.Column(db.Integer)
 
 
 class ScoreSchema(ma.SQLAlchemySchema):

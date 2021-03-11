@@ -3,7 +3,7 @@ from flask import jsonify, request
 from flask_cors import cross_origin
 from app.models.competition import Competition, CompetitionSchema
 import json
-
+from app.models.link_competition_competitor import LinkCompetitionCompetitor
 import decimal, datetime
 
 def alchemyencoder(obj):
@@ -101,4 +101,27 @@ def post_competition():
     except:
         db.session.rollback()
     resp_object = {'code': 20000, 'data': {'competition': None}}
+    return jsonify(resp_object), 200
+
+@app.route('/api/competition/competitor/add', methods=['POST'])
+@cross_origin()
+def add_competitor_to_competition():
+    if not request.is_json:
+        return jsonify({"message": "Missing JSON in request"}), 400
+    competitor = request.json.get('competitor', None)
+    competition = request.json.get('competition', None)
+    if not competitor:
+        return jsonify({"message": "Missing competitor parameter"}), 400
+    if not competition:
+        return jsonify({"message": "Missing competition parameter"}), 400
+    linkCompetitionCompetitor = LinkCompetitionCompetitor()
+    linkCompetitionCompetitor.competition_id = competition['id']
+    linkCompetitionCompetitor.competitor_id = competitor['id']
+    try:
+        db.session.add(linkCompetitionCompetitor)
+        db.session.flush()
+        db.session.commit()
+    except:
+        db.session.rollback()
+    resp_object = {'code': 20000, 'data': {'link_competition_competitor': None}}
     return jsonify(resp_object), 200

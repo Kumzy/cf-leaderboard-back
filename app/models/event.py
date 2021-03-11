@@ -14,6 +14,7 @@ class Event(db.Model):
                              uselist=True, viewonly=True, lazy='dynamic')
     max_score_best = db.Column(db.Boolean, nullable=False, server_default=db.text('True'))
     has_tiebreak = db.Column(db.Boolean, nullable=False, server_default=db.text('False'))
+    time_cap = db.Column(db.Integer)
     #competition = db.relationship("Competition", primaryjoin="Competition.id==Event.competition_id",remote_side="Competition.id")
 
 class EventSchema(ma.SQLAlchemySchema):
@@ -26,4 +27,5 @@ class EventSchema(ma.SQLAlchemySchema):
     scores = ma.Nested('ScoreSchema',many=True)
     max_score_best = ma.auto_field()
     has_tiebreak = ma.auto_field()
+    time_cap = ma.auto_field()
     #competition = ma.Nested('CompetitionSchema')
