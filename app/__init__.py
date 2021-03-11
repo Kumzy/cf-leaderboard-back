@@ -17,14 +17,13 @@ app.config['JWT_TOKEN_LOCATION'] = ['headers']
 app.config['JWT_HEADER_NAME'] = 'Authorization'
 app.config['JWT_HEADER_TYPE'] = 'Bearer'
 
-
 # app.config['JWT_ACCESS_COOKIE_PATH'] = '/api/'
 # app.config['JWT_REFRESH_COOKIE_PATH'] = '/token/refresh'
 #
 # app.config['JWT_COOKIE_CSRF_PROTECT'] = False
 
 app.config['JWT_SECRET_KEY'] = Config.JWT_SECRET_KEY
-
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = Config.JWT_ACCESS_TOKEN_EXPIRES
 
 jwt = JWTManager(app)
 
