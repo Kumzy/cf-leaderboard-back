@@ -37,3 +37,5 @@ class ScoreSchema(ma.SQLAlchemySchema):
     event = ma.Nested('EventSchema')
     category = ma.Nested('CategorySchema')
     competitor = ma.Nested('CompetitorSchema')
+    tiebreak = ma.auto_field()
+    time = ma.auto_field()

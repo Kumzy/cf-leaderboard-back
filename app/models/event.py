@@ -13,8 +13,11 @@ class Event(db.Model):
     scores = db.relationship(Score, primaryjoin='Score.event_id==Event.id',
                              uselist=True, viewonly=True, lazy='dynamic')
     max_score_best = db.Column(db.Boolean, nullable=False, server_default=db.text('True'))
-    has_tiebreak = db.Column(db.Boolean, nullable=False, server_default=db.text('False'))
+    has_tiebreak = db.Column(db.Boolean, nullable=False, server_default=db.text('True'))
     time_cap = db.Column(db.Integer)
+    is_amrap = db.Column(db.Boolean, nullable=False, server_default=db.text('False'))
+    max_score = db.Column(db.Integer)
+    order = db.Column(db.Integer)
     #competition = db.relationship("Competition", primaryjoin="Competition.id==Event.competition_id",remote_side="Competition.id")
 
 class EventSchema(ma.SQLAlchemySchema):
@@ -28,4 +31,7 @@ class EventSchema(ma.SQLAlchemySchema):
     max_score_best = ma.auto_field()
     has_tiebreak = ma.auto_field()
     time_cap = ma.auto_field()
+    is_amrap = ma.auto_field()
+    max_score = ma.auto_field()
+    order = ma.auto_field()
     #competition = ma.Nested('CompetitionSchema')
