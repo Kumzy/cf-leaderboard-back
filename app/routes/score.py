@@ -34,6 +34,7 @@ def post_score():
     score.category_id = category['id']
     score.result = result
     score.tiebreak = tiebreak
+    score.time = time
     try:
         db.session.add(score)
         db.session.flush()

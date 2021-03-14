@@ -17,6 +17,7 @@ class Competition(db.Model):
     date_start = db.Column(db.Date)
     created_on = db.Column(db.DateTime(timezone=True),server_default=db.text('now()'))
     events = db.relationship(Event, primaryjoin='Event.competition_id==Competition.id',
+                               order_by="asc(Event.order)",
                                uselist=True, viewonly=True, lazy='dynamic')
     categories = db.relationship(Category, secondary='link_competition_category', uselist=True, viewonly=True)
     competitors = db.relationship(Competitor, secondary='link_competition_competitor', uselist=True, viewonly=True)
