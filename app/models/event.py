@@ -1,6 +1,5 @@
 from sqlalchemy.dialects.postgresql import UUID
 from app import db, ma
-from app.models.score import Score
 
 class Event(db.Model):
     __tablename__ = 'event'
@@ -10,8 +9,8 @@ class Event(db.Model):
     name = db.Column(db.Text, unique=True)
     created_on = db.Column(db.DateTime(timezone=True),server_default=db.text('now()'))
     competition_id = db.Column(UUID(as_uuid=True), db.ForeignKey('competition.id'))
-    scores = db.relationship(Score, primaryjoin='Score.event_id==Event.id',
-                             uselist=True, viewonly=True, lazy='dynamic')
+    # scores = db.relationship(Score, primaryjoin='Score.event_id==Event.id',
+    #                          # uselist=True, viewonly=True, lazy='dynamic')
     max_score_best = db.Column(db.Boolean, nullable=False, server_default=db.text('True'))
     has_tiebreak = db.Column(db.Boolean, nullable=False, server_default=db.text('True'))
     time_cap = db.Column(db.Integer)

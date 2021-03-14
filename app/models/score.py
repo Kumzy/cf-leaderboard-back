@@ -13,17 +13,16 @@ class Score(db.Model):
     result = db.Column(db.Integer)
     created_on = db.Column(db.DateTime(timezone=True),server_default=db.text('now()'))
     event_id = db.Column(UUID(as_uuid=True), db.ForeignKey('event.id'))
-    # event = db.relationship("Event", primaryjoin="Event.id==Score.event_id",
-    #                               remote_side="Event.id")
+    event = db.relationship("Event", primaryjoin="Event.id==Score.event_id",
+                                  remote_side="Event.id", lazy='subquery')
     category_id = db.Column(UUID(as_uuid=True), db.ForeignKey('category.id'))
     category = db.relationship("Category", primaryjoin="Category.id==Score.category_id",
-                            remote_side="Category.id")
+                            remote_side="Category.id", lazy='subquery')
     competitor_id = db.Column(UUID(as_uuid=True), db.ForeignKey('competitor.id'))
     competitor = db.relationship("Competitor", primaryjoin="Competitor.id==Score.competitor_id",
-                            remote_side="Competitor.id")
+                            remote_side="Competitor.id", lazy='subquery' )
     tiebreak = db.Column(db.Integer)
     time = db.Column(db.Integer)
-
 
 class ScoreSchema(ma.SQLAlchemySchema):
     class Meta:
