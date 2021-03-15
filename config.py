@@ -5,7 +5,7 @@ class Config(object):
     POSTGRES = {
         'user': 'postgres',
         'pw': 'postgres',
-        'db': 'cf_leaderboard',
+        'db': 'cf_leaderboard_clapiers',
         'host': 'localhost',
         'port': '5432',
     }

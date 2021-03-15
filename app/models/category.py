@@ -17,3 +17,4 @@ class CategorySchema(ma.SQLAlchemySchema):
     id = ma.auto_field()
     name = ma.auto_field()
     created_on = ma.auto_field()
+    position = ma.auto_field()

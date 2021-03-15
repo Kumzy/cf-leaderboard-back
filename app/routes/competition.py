@@ -7,6 +7,10 @@ from app.models.link_competition_competitor import LinkCompetitionCompetitor
 import decimal, datetime
 from sqlalchemy.sql.expression import and_
 from flask_jwt_extended import jwt_required
+from app.models.score import Score, ScoreSchema
+from app.models.event import Event, EventSchema
+from app.models.competitor import Competitor
+import operator
 
 def alchemyencoder(obj):
     """JSON encoder function for SQLAlchemy special classes."""
@@ -38,48 +42,64 @@ def competition(id):
 @app.route('/api/competition/<id>/leaderboard', methods=['GET'])
 @cross_origin()
 def competition_leaderboard(id):
+    # Get the leaderboard or 404
+    competition = Competition.query.get_or_404(id)
+    competition_schema = CompetitionSchema()
+    competition_dict = competition_schema.dump(competition)
     # Retrieve gender first
     gender_id = request.args.get('gender_id')
     if gender_id is None:
         return jsonify({"message": "Missing gender_id parameter"}), 400
-    sql_request = "with scores as ( " \
-        "select competitor.id as competitor_id, " \
-	    "to_jsonb(competitor.*) as competitor, " \
-        "score.result, "\
-        "to_jsonb(category.*) as category, "\
-        "to_jsonb(event.*) as event, "\
-        "event.id as event_id, "\
-        "CASE WHEN event.max_score_best THEN ROW_NUMBER () OVER (PARTITION BY category.id,event.id ORDER BY score desc) + (category.position * 1000) "\
-        "ELSE ROW_NUMBER () OVER (PARTITION BY category.id,event.id ORDER BY score) + (category.position * 1000) "\
-        "END as position_wod " \
-        "from score " \
-        "left join event on score.event_id = event.id " \
-        "left join category on category.id = score.category_id "\
-        "left join competition on competition.id = event.competition_id "\
-        "left join competitor on competitor.id = score.competitor_id "\
-        "left join gender on gender.id = competitor.gender_id "\
-        "where gender.id = :gender_id " \
-        "and competition.id = :competition_id " \
-        "order by event.name asc,  position asc "\
-        "),scores_points as ( "\
-        "SELECT *, "\
-        "ROW_NUMBER () OVER (PARTITION BY event_id ORDER BY position_wod) as point "\
-        "FROM scores) "\
-        "select competitor.id, concat(competitor.firstname, ' ', competitor.lastname) as longname,  sum(scores_points.point) as points, jsonb_agg(scores_points.*) as events, "\
-        "ROW_NUMBER () OVER (order by sum(scores_points.point) asc) as rank " \
-        "from competitor " \
-        "left join scores_points on scores_points.competitor_id = competitor.id " \
-        "LEFT JOIN link_competition_competitor lcc on lcc.competitor_id = competitor.id " \
-        "left join gender on gender.id = competitor.gender_id " \
-        "where lcc.competition_id = :competition_id " \
-        "and gender.id = :gender_id " \
-        "group by competitor.id; "
-    results = db.session.execute(
-        sql_request,
-        {'gender_id': gender_id, 'competition_id': id}
-    )
-    o = json.dumps([dict(r) for r in results], default=alchemyencoder)
-    resp_object = {'code': 20000, 'data': {'items': json.loads(o)}}
+
+    scores = Score.query. \
+        join(Score.event).join(Score.competitor).filter(Event.competition_id == id) \
+        .filter(Competitor.gender_id == gender_id).order_by(Event.order.asc())
+    score_schema = ScoreSchema(many=True)
+    score_list = score_schema.dump(scores)
+
+    # Get individual events
+    events = Event.query.filter(Event.competition_id == id)
+    event_schema = EventSchema(many=True)
+    events_list = event_schema.dump(events)
+
+    # Check that events is not empty
+    # TODO: Check that events is not empty
+
+    # Generate array of scores for each events
+    for event in events_list:
+        event['scores'] = list()
+        for score in score_list:
+            if score['event']['id'] == event['id']:
+                if event['max_score'] is not None:
+                    score.update({'result_ordoned': event['max_score'] + (event['max_score'] - score['result'])})
+                event['scores'].append(score)
+
+        # Order by event category (1 best) (max lowest)
+        # Order scores by event by time
+        # Order scores by event by score (result ordoned)
+        # Order by tiebreak
+        event['scores'].sort(key=lambda p: (p['category']['position'],p['time'],p['result_ordoned'],p['tiebreak']))
+
+        # Affect points (best = 1) to (latest = highest number)
+        i = 1
+        for score in event['scores']:
+            score['point'] = i
+            i = i + 1
+    o = []
+    # Affect scores to each competitors in competition.competitors
+    if 'competitors' in competition_dict and isinstance(competition_dict['competitors'],list):
+        for competitor in competition_dict['competitors']:
+            competitor['scores'] = list()
+            # total_competitor = 0
+            for event in events_list:
+                for score in event['score']:
+                    if score['competitor']['id'] == competitor['id']:
+                        competitor['scores'].append(score)
+
+    # Set a rank on the competitor by summing all points in each event
+
+
+    resp_object = {'code': 20000, 'data': {'item': score_list}}
     return jsonify(resp_object), 200
 
 @app.route('/api/competition', methods=['POST'])
