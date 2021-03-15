@@ -81,25 +81,35 @@ def competition_leaderboard(id):
         event['scores'].sort(key=lambda p: (p['category']['position'],p['time'],p['result_ordoned'],p['tiebreak']))
 
         # Affect points (best = 1) to (latest = highest number)
-        i = 1
+        i = 0
         for score in event['scores']:
-            score['point'] = i
             i = i + 1
+            score['point'] = i
+        # Storing the last code to use later for when a participant
+        event['last_score'] = i
     o = []
     # Affect scores to each competitors in competition.competitors
+    competitors_result_dict = list()
     if 'competitors' in competition_dict and isinstance(competition_dict['competitors'],list):
         for competitor in competition_dict['competitors']:
-            competitor['scores'] = list()
-            # total_competitor = 0
-            for event in events_list:
-                for score in event['score']:
-                    if score['competitor']['id'] == competitor['id']:
-                        competitor['scores'].append(score)
+            if competitor['gender']['id'] == gender_id:
+                competitor['scores'] = list()
+                total_competitor = 0
+                for event in events_list:
+                    for score in event['scores']:
+                        if score['competitor']['id'] == competitor['id']:
+                            competitor['scores'].append(score)
+                            total_competitor = total_competitor + score['point']
+                competitor['total_points'] = total_competitor
+                competitors_result_dict.append(competitor)
 
     # Set a rank on the competitor by summing all points in each event
-
-
-    resp_object = {'code': 20000, 'data': {'item': score_list}}
+    competitors_result_dict.sort(key=lambda p: (p['total_points']))
+    rank = 1
+    for cptt in competitors_result_dict:
+        cptt['rank'] = rank
+        rank = rank + 1
+    resp_object = {'code': 20000, 'data': {'items': competitors_result_dict}}
     return jsonify(resp_object), 200
 
 @app.route('/api/competition', methods=['POST'])
