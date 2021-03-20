@@ -24,6 +24,10 @@ class Score(db.Model):
     tiebreak = db.Column(db.Integer)
     time = db.Column(db.Integer)
 
+    def generateScoreNotParticipated(self, last_score: int):
+        self.point = last_score + 1
+
+
 class ScoreSchema(ma.SQLAlchemySchema):
     class Meta:
         model = Score

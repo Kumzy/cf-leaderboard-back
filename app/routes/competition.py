@@ -96,12 +96,27 @@ def competition_leaderboard(id):
                 competitor['scores'] = list()
                 total_competitor = 0
                 for event in events_list:
+                    score_found_for_current_event = False
                     for score in event['scores']:
                         if score['competitor']['id'] == competitor['id']:
+                            score_found_for_current_event = True
                             competitor['scores'].append(score)
                             total_competitor = total_competitor + score['point']
+                    if score_found_for_current_event == False:
+                        if 'last_score' in event and event['last_score'] > 0:
+                            sc = dict()
+                            sc['point'] = event['last_score'] + 1
+                            sc['not_participated'] = True
+                            sc['event'] = dict()
+                            sc['event']['id'] = event['id']
+                            sc['category'] = dict()
+
+                            competitor['scores'].append(sc)
+                            total_competitor = total_competitor + sc['point']
                 competitor['total_points'] = total_competitor
                 competitors_result_dict.append(competitor)
+
+
 
     # Set a rank on the competitor by summing all points in each event
     competitors_result_dict.sort(key=lambda p: (p['total_points']))
