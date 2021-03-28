@@ -70,23 +70,44 @@ def competition_leaderboard(id):
         event['scores'] = list()
         for score in score_list:
             if score['event']['id'] == event['id']:
-                if event['max_score'] is not None:
-                    score.update({'result_ordoned': event['max_score'] + (event['max_score'] - score['result'])})
+                if 'has_maxscore' in event and event['has_maxscore'] == True:
+                    if event['max_score'] is not None:
+                        score.update({'result_ordoned': event['max_score'] + (event['max_score'] - score['result'])})
+                else:
+                    score.update({'result_ordoned': score['result'] * -1 })
                 event['scores'].append(score)
 
         # Order by event category (1 best) (max lowest)
         # Order scores by event by time
         # Order scores by event by score (result ordoned)
         # Order by tiebreak
-        event['scores'].sort(key=lambda p: (p['category']['position'],p['time'],p['result_ordoned'],p['tiebreak']))
+        if 'has_maxscore' in event and event['has_maxscore'] == True:
+            event['scores'].sort(key=lambda p: (p['category']['position'],p['time'],p['result_ordoned'],p['tiebreak']))
+        else:
+            event['scores'].sort(key=lambda p: (p['category']['position'],p['time'],p['result_ordoned'],p['tiebreak']))
 
         # Affect points (best = 1) to (latest = highest number)
         i = 0
-        for score in event['scores']:
-            i = i + 1
-            score['point'] = i
+        same_score_amount = 0
+        for index, score in enumerate(event['scores']):
+            if index > 0: #means it's not the first one
+                if (score['category']['position'] == event['scores'][index-1]['category']['position'] and
+                    score['time'] == event['scores'][index - 1]['time'] and
+                    score['result_ordoned'] == event['scores'][index - 1]['result_ordoned'] and
+                    score['tiebreak'] == event['scores'][index - 1]['tiebreak']
+                ): #Same category position, means same category
+                    score['point'] = i
+                    same_score_amount = same_score_amount + 1
+                else:
+                    i = i + 1 + same_score_amount
+                    same_score_amount = 0
+                    score['point'] = i
+            else:
+                i = i + 1 + same_score_amount
+                same_score_amount = 0
+                score['point'] = i
         # Storing the last code to use later for when a participant
-        event['last_score'] = i
+        event['last_score'] = i + same_score_amount
     o = []
     # Affect scores to each competitors in competition.competitors
     competitors_result_dict = list()

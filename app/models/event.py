@@ -15,6 +15,7 @@ class Event(db.Model):
     has_tiebreak = db.Column(db.Boolean, nullable=False, server_default=db.text('True'))
     time_cap = db.Column(db.Integer)
     is_amrap = db.Column(db.Boolean, nullable=False, server_default=db.text('False'))
+    has_maxscore = db.Column(db.Boolean, nullable=False, server_default=db.text('True'))
     max_score = db.Column(db.Integer)
     order = db.Column(db.Integer)
     #competition = db.relationship("Competition", primaryjoin="Competition.id==Event.competition_id",remote_side="Competition.id")
