@@ -196,6 +196,30 @@ def add_competitor_to_competition():
     resp_object = {'code': 20000, 'data': {'link_competition_competitor': None}}
     return jsonify(resp_object), 200
 
+@app.route('/api/competition/team/add', methods=['POST'])
+@jwt_required()
+@cross_origin()
+def add_team_to_competition():
+    if not request.is_json:
+        return jsonify({"message": "Missing JSON in request"}), 400
+    team = request.json.get('team', None)
+    competition = request.json.get('competition', None)
+    if not team:
+        return jsonify({"message": "Missing team parameter"}), 400
+    if not competition:
+        return jsonify({"message": "Missing competition parameter"}), 400
+    linkCompetitionTeam = LinkCompetitionTeam()
+    linkCompetitionTeam.competition_id = competition['id']
+    linkCompetitionTeam.team_id = team['id']
+    try:
+        db.session.add(linkCompetitionTeam)
+        db.session.flush()
+        db.session.commit()
+    except:
+        db.session.rollback()
+    resp_object = {'code': 20000, 'data': {'link_competition_team': None}}
+    return jsonify(resp_object), 200
+
 @app.route('/api/competition/competitor', methods=['DELETE'])
 @jwt_required()
 @cross_origin()

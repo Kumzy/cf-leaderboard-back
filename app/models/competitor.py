@@ -13,6 +13,7 @@ class Competitor(db.Model):
     lastname = db.Column(db.Text, nullable=False)
     email = db.Column(db.Text, unique=True)
     active = db.Column(db.Boolean)
+    anonymous = db.Column(db.Boolean)
     avatar = db.Column(JSONB)
     height = db.Column(db.Integer)
     birthday_date = db.Column(db.Date)

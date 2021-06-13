@@ -21,12 +21,14 @@ class Score(db.Model):
     competitor_id = db.Column(UUID(as_uuid=True), db.ForeignKey('competitor.id'))
     competitor = db.relationship("Competitor", primaryjoin="Competitor.id==Score.competitor_id",
                             remote_side="Competitor.id", lazy='subquery' )
+    team_id = db.Column(UUID(as_uuid=True), db.ForeignKey('team.id'))
+    team = db.relationship("Team", primaryjoin="Team.id==Score.team_id",
+                                 remote_side="Team.id", lazy='subquery')
     tiebreak = db.Column(db.Integer)
     time = db.Column(db.Integer)
 
     def generateScoreNotParticipated(self, last_score: int):
         self.point = last_score + 1
-
 
 class ScoreSchema(ma.SQLAlchemySchema):
     class Meta:
@@ -40,5 +42,6 @@ class ScoreSchema(ma.SQLAlchemySchema):
     event = ma.Nested('EventSchema')
     category = ma.Nested('CategorySchema')
     competitor = ma.Nested('CompetitorSchema')
+    team = ma.Nested('TeamSchema')
     tiebreak = ma.auto_field()
     time = ma.auto_field()

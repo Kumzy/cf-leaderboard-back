@@ -44,16 +44,19 @@ from app.models.country import Country
 from app.models.gender import Gender
 from app.models.category import Category
 from app.models.competitor import Competitor
+from app.models.team import Team
 from app.models.competition import Competition
 from app.models.event import Event
 from app.models.score import Score
 from app.models.link_competition_category import LinkCompetitionCategory
 from app.models.link_competition_competitor import LinkCompetitionCompetitor
 from app.models.link_competition_gender import LinkCompetitionGender
+from app.models.link_team_competitor import LinkTeamCompetitor
 from app.models.user import User
 
 #Routes import
 from app.routes import competitor
+from app.routes import team
 from app.routes import country
 from app.routes import gender
 from app.routes import competition
