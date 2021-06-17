@@ -22,7 +22,11 @@ def alchemyencoder(obj):
 @app.route('/api/competitions', methods=['GET'])
 @cross_origin()
 def competitions():
-    competition = Competition.query.all()
+    active = request.args.get('active')
+    if active is not None:
+        competition = Competition.query.filter(Competition.active == active).all()
+    else:
+        competition = Competition.query.all()
     competition_schema = CompetitionSchema(many=True)
     # Serialize the queryset
     result = competition_schema.dump(competition)
@@ -48,81 +52,187 @@ def competition_leaderboard(id):
     competition_dict = competition_schema.dump(competition)
     # Retrieve gender first
     gender_id = request.args.get('gender_id')
-    if gender_id is None:
-        return jsonify({"message": "Missing gender_id parameter"}), 400
+    # if gender_id is None:
+    #     return jsonify({"message": "Missing gender_id parameter"}), 400
 
-    scores = Score.query. \
-        join(Score.event).join(Score.competitor).filter(Event.competition_id == id) \
-        .filter(Competitor.gender_id == gender_id).order_by(Event.order.asc())
-    score_schema = ScoreSchema(many=True)
-    score_list = score_schema.dump(scores)
+    if gender_id is not None:
 
-    # Get individual events
-    events = Event.query.filter(Event.competition_id == id)
-    event_schema = EventSchema(many=True)
-    events_list = event_schema.dump(events)
+        # Gender filter
+        scores = Score.query. \
+            join(Score.event).join(Score.competitor).filter(Event.competition_id == id) \
+            .filter(Competitor.gender_id == gender_id).order_by(Event.order.asc())
 
-    # Check that events is not empty
-    # TODO: Check that events is not empty
+        score_schema = ScoreSchema(many=True)
+        score_list = score_schema.dump(scores)
 
-    # Generate array of scores for each events
-    for event in events_list:
-        event['scores'] = list()
-        for score in score_list:
-            if score['event']['id'] == event['id']:
-                if 'has_maxscore' in event and event['has_maxscore'] == True:
-                    if event['max_score'] is not None:
-                        score.update({'result_ordoned': event['max_score'] + (event['max_score'] - score['result'])})
-                else:
-                    score.update({'result_ordoned': score['result'] * -1 })
-                event['scores'].append(score)
+        # Get individual events
+        events = Event.query.filter(Event.competition_id == id)
+        event_schema = EventSchema(many=True)
+        events_list = event_schema.dump(events)
 
-        # Order by event category (1 best) (max lowest)
-        # Order scores by event by time
-        # Order scores by event by score (result ordoned)
-        # Order by tiebreak
-        if 'has_maxscore' in event and event['has_maxscore'] == True:
-            event['scores'].sort(key=lambda p: (p['category']['position'],p['time'],p['result_ordoned'],p['tiebreak']))
-        else:
-            event['scores'].sort(key=lambda p: (p['category']['position'],p['time'],p['result_ordoned'],p['tiebreak']))
+        # Check that events is not empty
+        # TODO: Check that events is not empty
 
-        # Affect points (best = 1) to (latest = highest number)
-        i = 0
-        same_score_amount = 0
-        for index, score in enumerate(event['scores']):
-            if index > 0: #means it's not the first one
-                if (score['category']['position'] == event['scores'][index-1]['category']['position'] and
-                    score['time'] == event['scores'][index - 1]['time'] and
-                    score['result_ordoned'] == event['scores'][index - 1]['result_ordoned'] and
-                    score['tiebreak'] == event['scores'][index - 1]['tiebreak']
-                ): #Same category position, means same category
-                    score['point'] = i
-                    same_score_amount = same_score_amount + 1
+        # Generate array of scores for each events
+        for event in events_list:
+            event['scores'] = list()
+            for score in score_list:
+                if score['event']['id'] == event['id']:
+                    if 'has_maxscore' in event and event['has_maxscore'] == True:
+                        if event['max_score'] is not None:
+                            score.update(
+                                {'result_ordoned': event['max_score'] + (event['max_score'] - score['result'])})
+                    else:
+                        score.update({'result_ordoned': score['result'] * -1})
+                    event['scores'].append(score)
+
+            # Order by event category (1 best) (max lowest)
+            # Order scores by event by time
+            # Order scores by event by score (result ordoned)
+            # Order by tiebreak
+            if 'has_maxscore' in event and event['has_maxscore'] == True:
+                event['scores'].sort(
+                    key=lambda p: (p['category']['position'], p['time'], p['result_ordoned'], p['tiebreak']))
+            else:
+                event['scores'].sort(
+                    key=lambda p: (p['category']['position'], p['time'], p['result_ordoned'], p['tiebreak']))
+
+            # Affect points (best = 1) to (latest = highest number)
+            i = 0
+            same_score_amount = 0
+            for index, score in enumerate(event['scores']):
+                if index > 0:  # means it's not the first one
+                    if (score['category']['position'] == event['scores'][index - 1]['category']['position'] and
+                            score['time'] == event['scores'][index - 1]['time'] and
+                            score['result_ordoned'] == event['scores'][index - 1]['result_ordoned'] and
+                            score['tiebreak'] == event['scores'][index - 1]['tiebreak']
+                    ):  # Same category position, means same category
+                        score['point'] = i
+                        same_score_amount = same_score_amount + 1
+                    else:
+                        i = i + 1 + same_score_amount
+                        same_score_amount = 0
+                        score['point'] = i
                 else:
                     i = i + 1 + same_score_amount
                     same_score_amount = 0
                     score['point'] = i
+            # Storing the last code to use later for when a participant
+            event['last_score'] = i + same_score_amount
+        o = []
+        # Affect scores to each competitors in competition.competitors
+        competitors_result_dict = list()
+        if 'competitors' in competition_dict and isinstance(competition_dict['competitors'], list):
+            for competitor in competition_dict['competitors']:
+                if competitor['gender']['id'] == gender_id:
+                    competitor['scores'] = list()
+                    total_competitor = 0
+                    for event in events_list:
+                        score_found_for_current_event = False
+                        for score in event['scores']:
+                            if score['competitor']['id'] == competitor['id']:
+                                score_found_for_current_event = True
+                                competitor['scores'].append(score)
+                                total_competitor = total_competitor + score['point']
+                        if score_found_for_current_event == False:
+                            if 'last_score' in event and event['last_score'] > 0:
+                                sc = dict()
+                                sc['point'] = event['last_score'] + 1
+                                sc['not_participated'] = True
+                                sc['event'] = dict()
+                                sc['event']['id'] = event['id']
+                                sc['category'] = dict()
+
+                                competitor['scores'].append(sc)
+                                total_competitor = total_competitor + sc['point']
+                    competitor['total_points'] = total_competitor
+                    competitors_result_dict.append(competitor)
+        # Set a rank on the competitor by summing all points in each event
+        competitors_result_dict.sort(key=lambda p: (p['total_points']))
+        rank = 1
+        for cptt in competitors_result_dict:
+            cptt['rank'] = rank
+            rank = rank + 1
+        resp_object = {'code': 20000, 'data': {'items': competitors_result_dict}}
+        return jsonify(resp_object), 200
+    else:
+        # Team
+        scores = Score.query. \
+            join(Score.event).join(Score.team).filter(Event.competition_id == id) \
+            .order_by(Event.order.asc())
+
+        score_schema = ScoreSchema(many=True)
+        score_list = score_schema.dump(scores)
+
+        # Get individual events
+        events = Event.query.filter(Event.competition_id == id)
+        event_schema = EventSchema(many=True)
+        events_list = event_schema.dump(events)
+
+        # Check that events is not empty
+        # TODO: Check that events is not empty
+
+        # Generate array of scores for each events
+        for event in events_list:
+            event['scores'] = list()
+            for score in score_list:
+                if score['event']['id'] == event['id']:
+                    if 'has_maxscore' in event and event['has_maxscore'] == True:
+                        if event['max_score'] is not None:
+                            score.update(
+                                {'result_ordoned': event['max_score'] + (event['max_score'] - score['result'])})
+                    else:
+                        score.update({'result_ordoned': score['result'] * -1})
+                    event['scores'].append(score)
+
+            # Order by event category (1 best) (max lowest)
+            # Order scores by event by time
+            # Order scores by event by score (result ordoned)
+            # Order by tiebreak
+            if 'has_maxscore' in event and event['has_maxscore'] == True:
+                event['scores'].sort(
+                    key=lambda p: (p['category']['position'], p['time'], p['result_ordoned'], p['tiebreak']))
             else:
-                i = i + 1 + same_score_amount
-                same_score_amount = 0
-                score['point'] = i
-        # Storing the last code to use later for when a participant
-        event['last_score'] = i + same_score_amount
-    o = []
-    # Affect scores to each competitors in competition.competitors
-    competitors_result_dict = list()
-    if 'competitors' in competition_dict and isinstance(competition_dict['competitors'],list):
-        for competitor in competition_dict['competitors']:
-            if competitor['gender']['id'] == gender_id:
-                competitor['scores'] = list()
-                total_competitor = 0
+                event['scores'].sort(
+                    key=lambda p: (p['category']['position'], p['time'], p['result_ordoned'], p['tiebreak']))
+
+            # Affect points (best = 1) to (latest = highest number)
+            i = 0
+            same_score_amount = 0
+            for index, score in enumerate(event['scores']):
+                if index > 0:  # means it's not the first one
+                    if (score['category']['position'] == event['scores'][index - 1]['category']['position'] and
+                            score['time'] == event['scores'][index - 1]['time'] and
+                            score['result_ordoned'] == event['scores'][index - 1]['result_ordoned'] and
+                            score['tiebreak'] == event['scores'][index - 1]['tiebreak']
+                    ):  # Same category position, means same category
+                        score['point'] = i
+                        same_score_amount = same_score_amount + 1
+                    else:
+                        i = i + 1 + same_score_amount
+                        same_score_amount = 0
+                        score['point'] = i
+                else:
+                    i = i + 1 + same_score_amount
+                    same_score_amount = 0
+                    score['point'] = i
+            # Storing the last code to use later for when a participant
+            event['last_score'] = i + same_score_amount
+        o = []
+        # Affect scores to each competitors in competition.teams
+        teams_result_dict = list()
+        if 'teams' in competition_dict and isinstance(competition_dict['teams'], list):
+            for team in competition_dict['teams']:
+                # if competitor['gender']['id'] == gender_id:
+                team['scores'] = list()
+                total_team = 0
                 for event in events_list:
                     score_found_for_current_event = False
                     for score in event['scores']:
-                        if score['competitor']['id'] == competitor['id']:
+                        if score['team']['id'] == team['id']:
                             score_found_for_current_event = True
-                            competitor['scores'].append(score)
-                            total_competitor = total_competitor + score['point']
+                            team['scores'].append(score)
+                            total_team = total_team + score['point']
                     if score_found_for_current_event == False:
                         if 'last_score' in event and event['last_score'] > 0:
                             sc = dict()
@@ -132,21 +242,20 @@ def competition_leaderboard(id):
                             sc['event']['id'] = event['id']
                             sc['category'] = dict()
 
-                            competitor['scores'].append(sc)
-                            total_competitor = total_competitor + sc['point']
-                competitor['total_points'] = total_competitor
-                competitors_result_dict.append(competitor)
+                            team['scores'].append(sc)
+                            total_team = total_team + sc['point']
+                team['total_points'] = total_team
+                teams_result_dict.append(team)
 
-
-
-    # Set a rank on the competitor by summing all points in each event
-    competitors_result_dict.sort(key=lambda p: (p['total_points']))
-    rank = 1
-    for cptt in competitors_result_dict:
-        cptt['rank'] = rank
-        rank = rank + 1
-    resp_object = {'code': 20000, 'data': {'items': competitors_result_dict}}
-    return jsonify(resp_object), 200
+        # Set a rank on the competitor by summing all points in each event
+        teams_result_dict.sort(key=lambda p: (p['total_points']))
+        rank = 1
+        for cptt in teams_result_dict:
+            cptt['rank'] = rank
+            rank = rank + 1
+        resp_object = {'code': 20000, 'data': {'items': teams_result_dict}}
+        return jsonify(resp_object), 200
+    return jsonify({'error':'error'}), 400
 
 @app.route('/api/competition', methods=['POST'])
 @cross_origin()

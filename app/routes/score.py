@@ -12,15 +12,16 @@ def post_score():
     if not request.is_json:
         return jsonify({"message": "Missing JSON in request"}), 400
     event = request.json.get('event', None)
-    competitor = request.json.get('competitor', None)
+    # competitor = request.json.get('competitor', None)
+    team = request.json.get('team', None)
     category = request.json.get('category', None)
     result = request.json.get('result', None)
     time = request.json.get('time', None)
     tiebreak = request.json.get('tiebreak', None)
     if not event:
         return jsonify({"message": "Missing event parameter"}), 400
-    if not competitor:
-        return jsonify({"message": "Missing competitor parameter"}), 400
+    if not team:
+        return jsonify({"message": "Missing team parameter"}), 400
     if not category:
         return jsonify({"message": "Missing category parameter"}), 400
     if not result:
@@ -31,7 +32,7 @@ def post_score():
         return jsonify({"message": "Missing tiebreak parameter"}), 400
     score = Score()
     score.event_id = event['id']
-    score.competitor_id = competitor['id']
+    score.team_id = team['id']
     score.category_id = category['id']
     score.result = result
     score.tiebreak = tiebreak
@@ -64,15 +65,16 @@ def edit_score(id):
         if not request.is_json:
             return jsonify({"message": "Missing JSON in request"}), 400
         event = request.json.get('event', None)
-        competitor = request.json.get('competitor', None)
+        # competitor = request.json.get('competitor', None)
+        team = request.json.get('team', None)
         category = request.json.get('category', None)
         result = request.json.get('result', None)
         time = request.json.get('time', None)
         tiebreak = request.json.get('tiebreak', None)
         if not event:
             return jsonify({"message": "Missing event parameter"}), 400
-        if not competitor:
-            return jsonify({"message": "Missing competitor parameter"}), 400
+        if not team:
+            return jsonify({"message": "Missing team parameter"}), 400
         if not category:
             return jsonify({"message": "Missing category parameter"}), 400
         if not result:
@@ -82,7 +84,7 @@ def edit_score(id):
         if not tiebreak:
             return jsonify({"message": "Missing tiebreak parameter"}), 400
         score.event_id = event['id']
-        score.competitor_id = competitor['id']
+        score.competitor_id = team['id']
         score.category_id = category['id']
         score.result = result
         score.tiebreak = tiebreak
