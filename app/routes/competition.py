@@ -83,7 +83,7 @@ def competition_leaderboard(id):
                             score.update(
                                 {'result_ordoned': event['max_score'] + (event['max_score'] - score['result'])})
                     else:
-                        score.update({'result_ordoned': score['result'] * -1})
+                            score.update({'result_ordoned': score['result']})
                     event['scores'].append(score)
 
             # Order by event category (1 best) (max lowest)
@@ -182,7 +182,10 @@ def competition_leaderboard(id):
                             score.update(
                                 {'result_ordoned': event['max_score'] + (event['max_score'] - score['result'])})
                     else:
-                        score.update({'result_ordoned': score['result'] * -1})
+                        if 'max_score_best' in event and event['max_score_best'] == True:
+                            score.update({'result_ordoned': score['result'] * -1})
+                        else:
+                            score.update({'result_ordoned': score['result']})
                     event['scores'].append(score)
 
             # Order by event category (1 best) (max lowest)
